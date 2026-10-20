@@ -1,12 +1,39 @@
+
 import { ref, computed } from 'vue'
 import { defineStore } from 'pinia'
 
-export const useCounterStore = defineStore('counter', () => {
-  const count = ref(0)
-  const doubleCount = computed(() => count.value * 2)
-  function increment() {
-    count.value++
+export const useAppStore = defineStore('app', () => {
+  // Estat del login
+  const loginInfo = ref({
+    loggedIn: false,
+    username: '',
+    image: '',
+  })
+
+  // Vots de les quatre opcions
+  const votos = ref([0, 0, 0, 0])
+
+  // Getter
+  const isLoggedIn = computed(() => loginInfo.value.loggedIn)
+
+  // Accions
+  function setLoginInfo({ loggedIn, username, image }) {
+    loginInfo.value = {
+      loggedIn,
+      username,
+      image,
+    }
   }
 
-  return { count, doubleCount, increment }
+  function setVotos(nousVots) {
+    votos.value = [...nousVots]
+  }
+
+  return {
+    loginInfo,
+    votos,
+    isLoggedIn,
+    setLoginInfo,
+    setVotos,
+  }
 })
