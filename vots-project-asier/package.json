@@ -1,12 +1,17 @@
+
 {
   "name": "vots-project-asier",
-  "version": "0.0.0",
+  "version": "1.0.0",
   "private": true,
   "type": "module",
+  "main": "electron/main.cjs",
   "scripts": {
     "dev": "vite",
     "build": "vite build",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "electron": "wait-on http://localhost:5173 && electron electron/main.cjs",
+    "app": "concurrently -k \"vite --host 127.0.0.1\" \"npm run electron\"",
+    "dist": "npm run build && electron-builder"
   },
   "dependencies": {
     "chart.js": "^4.5.1",
@@ -18,7 +23,28 @@
   "devDependencies": {
     "@vitejs/plugin-vue": "^6.0.8",
     "vite": "^8.2.2",
-    "vite-plugin-vue-devtools": "^8.2.1"
+    "vite-plugin-vue-devtools": "^8.2.1",
+    "electron": "^39.0.0",
+    "electron-builder": "^26.0.12",
+    "concurrently": "^9.2.1",
+    "wait-on": "^8.0.4"
+  },
+  "build": {
+    "appId": "cat.votacions.app",
+    "productName": "Votacions",
+    "directories": {
+      "output": "dist-electron"
+    },
+    "files": [
+      "electron/**/*",
+      "dist/**/*",
+      "package.json"
+    ],
+    "linux": {
+      "target": [
+        "AppImage"
+      ]
+    }
   },
   "engines": {
     "node": "^22.18.0 || >=24.12.0"

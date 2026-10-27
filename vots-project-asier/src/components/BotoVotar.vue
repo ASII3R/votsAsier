@@ -1,18 +1,17 @@
 
 <template>
-  <v-card class="pa-4 text-center" height="100%">
-    <v-card-title class="justify-center">
-      Opció {{ opcio + 1 }}
-    </v-card-title>
+  <v-card class="pa-4 text-center" variant="outlined">
+    <v-card-title>Opció {{ opcio + 1 }}</v-card-title>
 
     <v-card-text>
-      <div class="text-h4">{{ vots }}</div>
+      <div class="numero">{{ vots }}</div>
       <div>vots</div>
     </v-card-text>
 
     <v-btn
       color="primary"
       block
+      :disabled="!connectat"
       @click="$emit('votar', opcio)"
     >
       Votar
@@ -30,7 +29,19 @@ defineProps({
     type: Number,
     required: true,
   },
+  connectat: {
+    type: Boolean,
+    default: false,
+  },
 })
 
 defineEmits(['votar'])
 </script>
+
+<style scoped>
+.numero {
+  font-size: 32px;
+  font-weight: bold;
+  color: #1976d2;
+}
+</style>

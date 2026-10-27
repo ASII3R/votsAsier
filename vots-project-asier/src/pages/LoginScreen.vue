@@ -1,8 +1,6 @@
-```vue
 <template>
   <main class="login-page">
     <section class="login-card">
-      <div class="login-icon">🗳️</div>
 
       <h1>Votacions</h1>
       <p class="subtitle">Inicia sesión para participar</p>
@@ -176,4 +174,3 @@ button:hover {
   line-height: 1.8;
 }
 </style>
-```

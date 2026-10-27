@@ -1,49 +1,39 @@
 
 <template>
-  <v-container>
-    <v-row align="center" class="mb-4">
-      <v-col>
-        <h1>Votacions en temps real</h1>
-        <p>Usuari: {{ store.loginInfo.username }}</p>
-      </v-col>
+  <v-container class="pagina">
+    <header class="capcalera">
+      <h1>Votacions en temps real</h1>
+      <p>Usuari: {{ store.loginInfo.username }}</p>
 
-      <v-col cols="auto">
-        <v-btn color="secondary" @click="tancarSessio">
-          Tancar sessió
-        </v-btn>
-      </v-col>
-    </v-row>
+      <v-btn variant="outlined" color="primary" @click="tancarSessio">
+        Tancar sessió
+      </v-btn>
+    </header>
 
-    <v-alert
-      :type="connectat ? 'success' : 'warning'"
-      class="mb-4"
-    >
+    <div class="estat" :class="{ connectat }">
       {{ connectat ? 'Connectat al servidor' : 'Connectant al servidor...' }}
-    </v-alert>
+    </div>
 
-    <v-row>
-      <v-col
+    <h2>Tria la teva opció</h2>
+
+    <div class="opcions">
+      <BotoVotar
         v-for="(vots, index) in store.votos"
         :key="index"
-        cols="12"
-        sm="6"
-        md="3"
-      >
-        <VotoVotar
         :opcio="index"
         :vots="vots"
+        :connectat="connectat"
         @votar="votar"
-        />
-      </v-col>
-    </v-row>
+      />
+    </div>
 
-    <v-card class="pa-4 mt-8">
-      <v-card-title>Resultats de les votacions</v-card-title>
+    <section class="grafica">
+      <h2>Resultats de les votacions</h2>
 
       <div class="chart-container">
         <canvas ref="chartCanvas"></canvas>
       </div>
-    </v-card>
+    </section>
   </v-container>
 </template>
 
@@ -51,7 +41,7 @@
 import { ref, onMounted, onBeforeUnmount, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import { useAppStore } from '@/stores/app'
-import VotoVotar from '@/components/VotoVotar.vue'
+import BotoVotar from '@/components/BotoVotar.vue'
 import Chart from 'chart.js/auto'
 
 const store = useAppStore()
@@ -66,8 +56,8 @@ let chartInstance = null
 function votar(opcio) {
   if (socket && socket.readyState === WebSocket.OPEN) {
     socket.send(JSON.stringify({
-      type: 'votar',
-      opcio,
+      tipo: 'votar',
+      opcion: opcio,
     }))
   }
 }
@@ -79,29 +69,38 @@ function tancarSessio() {
     image: '',
   })
 
+  if (socket) {
+    socket.close()
+    socket = null
+  }
+
   router.push('/')
 }
 
 onMounted(() => {
   if (!store.isLoggedIn) {
-    router.push('/')
+    router.replace('/')
     return
   }
 
+  // En desenvolupament local, el servidor escolta al port 3000.
   socket = new WebSocket('ws://localhost:3000')
 
   socket.onopen = () => {
     connectat.value = true
   }
 
-  socket.onmessage = event => {
+  socket.onmessage = (event) => {
     try {
       const missatge = JSON.parse(event.data)
 
       if (
-        missatge.type === 'votos' &&
+        missatge.tipo === 'votos' &&
         Array.isArray(missatge.votos) &&
-        missatge.votos.length === 4
+        missatge.votos.length === 4 &&
+        missatge.votos.every(
+          (vot) => Number.isInteger(vot) && vot >= 0
+        )
       ) {
         store.setVotos(missatge.votos)
       }
@@ -114,9 +113,9 @@ onMounted(() => {
     connectat.value = false
   }
 
-  socket.onerror = error => {
-    console.error('Error WebSocket:', error)
+  socket.onerror = (error) => {
     connectat.value = false
+    console.error('Error WebSocket:', error)
   }
 
   if (chartCanvas.value) {
@@ -126,7 +125,7 @@ onMounted(() => {
         labels: ['Opció 1', 'Opció 2', 'Opció 3', 'Opció 4'],
         datasets: [{
           label: 'Vots',
-          data: store.votos,
+          data: [...store.votos],
           backgroundColor: [
             'rgba(75, 192, 192, 0.6)',
             'rgba(255, 99, 132, 0.6)',
@@ -158,7 +157,7 @@ onMounted(() => {
 
 watch(
   () => store.votos,
-  nousVots => {
+  (nousVots) => {
     if (chartInstance) {
       chartInstance.data.datasets[0].data = [...nousVots]
       chartInstance.update()
@@ -168,17 +167,82 @@ watch(
 )
 
 onBeforeUnmount(() => {
-  if (socket) socket.close()
-  if (chartInstance) chartInstance.destroy()
+  if (socket) {
+    socket.close()
+    socket = null
+  }
+
+  if (chartInstance) {
+    chartInstance.destroy()
+    chartInstance = null
+  }
 })
 </script>
 
 <style scoped>
+.pagina {
+  width: 100%;
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 30px 20px;
+}
+
+.capcalera {
+  text-align: center;
+  margin-bottom: 25px;
+}
+
+.capcalera h1 {
+  font-size: 30px;
+  margin-bottom: 10px;
+  color: #1976d2;
+}
+
+.estat {
+  padding: 12px;
+  margin-bottom: 25px;
+  text-align: center;
+  background: #fff3cd;
+  color: #795600;
+}
+
+.estat.connectat {
+  background: #e4f5e9;
+  color: #216b38;
+}
+
+h2 {
+  font-size: 22px;
+  margin-bottom: 20px;
+}
+
+.opcions {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 20px;
+}
+
+.grafica {
+  margin-top: 35px;
+  padding: 20px;
+  border: 1px solid #ddd;
+}
+
 .chart-container {
   position: relative;
-  height: 50vh;
   width: 100%;
-  max-width: 800px;
-  margin: 20px auto;
+  height: 350px;
+}
+
+@media (max-width: 750px) {
+  .opcions {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 450px) {
+  .opcions {
+    grid-template-columns: 1fr;
+  }
 }
 </style>
