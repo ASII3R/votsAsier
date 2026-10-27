@@ -1,12 +1,12 @@
 services:
   frontend:
     build:
-      context: ./client
+      context: ./vots-project-asier
       dockerfile: Dockerfile
     ports:
       - "3000:3000"
     volumes:
-      - ./client:/usr/src/app
+      - ./vots-project-asier:/usr/src/app
       - /usr/src/app/node_modules
     environment:
       - CHOKIDAR_USEPOLLING=true
@@ -19,6 +19,8 @@ services:
       dockerfile: Dockerfile
     ports:
       - "8080:8080"
+    environment:
+      - PORT=8080
     volumes:
       - ./servidor:/usr/src/app
       - /usr/src/app/node_modules

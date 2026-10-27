@@ -83,8 +83,7 @@ onMounted(() => {
     return
   }
 
-  // En desenvolupament local, el servidor escolta al port 3000.
-  socket = new WebSocket('ws://localhost:3000')
+  socket = new WebSocket('ws://localhost:8080')
 
   socket.onopen = () => {
     connectat.value = true
