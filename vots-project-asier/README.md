@@ -1,38 +1,66 @@
-# vots-project-asier
+# Vots Asier
 
-This template should help get you started developing with Vue 3 in Vite.
+Aplicació de votacions amb un frontend Vue/Vite i un servidor WebSocket.
 
-## Recommended IDE Setup
+## Requisits
 
-[VS Code](https://code.visualstudio.com/) + [Vue (Official)](https://marketplace.visualstudio.com/items?itemName=Vue.volar) (and disable Vetur).
+- Node.js 22 o superior
+- npm
+- Docker i Docker Compose (només per executar-lo amb contenidors)
 
-## Recommended Browser Setup
+## Execució local
 
-- Chromium-based browsers (Chrome, Edge, Brave, etc.):
-  - [Vue.js devtools](https://chromewebstore.google.com/detail/vuejs-devtools/nhdogjmejiglipccpnnnanhbledajbpd)
-  - [Turn on Custom Object Formatter in Chrome DevTools](http://bit.ly/object-formatters)
-- Firefox:
-  - [Vue.js devtools](https://addons.mozilla.org/en-US/firefox/addon/vue-js-devtools/)
-  - [Turn on Custom Object Formatter in Firefox DevTools](https://fxdx.dev/firefox-devtools-custom-object-formatters/)
-
-## Customize configuration
-
-See [Vite Configuration Reference](https://vite.dev/config/).
-
-## Project Setup
+Des de l'arrel del repositori, instal·la les dependències de cada servei:
 
 ```sh
+cd servidor
+npm install
+
+cd ../vots-project-asier
 npm install
 ```
 
-### Compile and Hot-Reload for Development
+Inicia el servidor WebSocket en una terminal:
 
 ```sh
+cd servidor
+npm start
+```
+
+Inicia el frontend en una altra terminal:
+
+```sh
+cd vots-project-asier
 npm run dev
 ```
 
-### Compile and Minify for Production
+Obre [http://localhost:3000](http://localhost:3000). El servidor WebSocket estarà disponible a `ws://localhost:8080`.
+
+Per generar el build de producció del frontend:
 
 ```sh
+cd vots-project-asier
 npm run build
+```
+
+## Execució amb Docker
+
+Des de l'arrel del repositori, construeix i inicia els dos serveis:
+
+```sh
+docker compose up --build
+```
+
+El frontend estarà disponible a [http://localhost:3000](http://localhost:3000) i el servidor WebSocket al port `8080`.
+
+Per executar-los en segon pla:
+
+```sh
+docker compose up --build -d
+```
+
+Per aturar els contenidors:
+
+```sh
+docker compose down
 ```
